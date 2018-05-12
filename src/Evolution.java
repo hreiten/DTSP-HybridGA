@@ -1,11 +1,12 @@
 import java.util.Arrays;
+import java.util.Random;
 
 class Evolution{	
 
 	// simulated annealing variables
     static int nRuns = 10000;
     static double startTemp = 8;
-    static double alpha = 0.997;
+    static double alpha = 0.995;
     
     // crossover variables
     static double crossoverRate = 0.6;

@@ -1,25 +1,32 @@
-import java.applet.Applet;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.sql.Time;
-import java.text.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Panel;
+import java.awt.TextArea;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Random;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.awt.*; 
+import java.util.stream.IntStream;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
-public class TSP {
-
+public class ParallellTSP {
+	
 	private static final int cityShiftAmount = 60; //DO NOT CHANGE THIS.
-	
-	public static Random randomGenerator = new Random(20); 
-	
+
+	public static Random randomGenerator = new Random(20);
+
     /**
      * How many cities to use.
      */
@@ -49,7 +56,7 @@ public class TSP {
      * The list of cities (with current movement applied).
      */
     protected static City[] cities;
-    
+
     /**
      * The list of cities that will be used to determine movement.
      */
@@ -134,15 +141,7 @@ public class TSP {
                 int ypos = cities[i].gety();
                 g.setColor(Color.green);
                 g.fillOval(xpos - 5, ypos - 5, 10, 10);
-                
-                //// SHOW Outline of movement boundary
-                // xpos = originalCities[i].getx();
-                // ypos = originalCities[i].gety();
-                // g.setColor(Color.darkGray);
-                // g.drawLine(xpos + cityShiftAmount, ypos, xpos, ypos + cityShiftAmount);
-                // g.drawLine(xpos, ypos + cityShiftAmount, xpos - cityShiftAmount, ypos);
-                // g.drawLine(xpos - cityShiftAmount, ypos, xpos, ypos - cityShiftAmount);
-                // g.drawLine(xpos, ypos - cityShiftAmount, xpos + cityShiftAmount, ypos);
+
             }
 
             g.setColor(Color.gray);
@@ -157,10 +156,10 @@ public class TSP {
                         cities[last].gety());
                 }
             }
-                        
+
             int homeCity = chromosomes[0].getCity(0);
             int lastCity = chromosomes[0].getCity(cityCount - 1);
-                        
+
             //Drawing line returning home
             g.drawLine(
                     cities[homeCity].getx(),
@@ -173,12 +172,12 @@ public class TSP {
 
     protected static City[] LoadCitiesFromFile(String filename, City[] citiesArray) {
         ArrayList<City> cities = new ArrayList<City>();
-        try 
+        try
         {
             FileReader inputFile = new FileReader(filename);
             BufferedReader bufferReader = new BufferedReader(inputFile);
             String line;
-            while ((line = bufferReader.readLine()) != null) { 
+            while ((line = bufferReader.readLine()) != null) {
                 String [] coordinates = line.split(", ");
                 cities.add(new City(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[1])));
             }
@@ -186,9 +185,9 @@ public class TSP {
             bufferReader.close();
 
         } catch (Exception e) {
-            System.out.println("Error while reading file line by line:" + e.getMessage());                      
+            System.out.println("Error while reading file line by line:" + e.getMessage());
         }
-        
+
         citiesArray = new City[cities.size()];
         return cities.toArray(citiesArray);
     }
@@ -200,9 +199,9 @@ public class TSP {
         for(int i = 0; i < cities.length; i++) {
         	int x = cities[i].getx();
         	int y = cities[i].gety();
-        	
+
             int position = randomGenerator.nextInt(5);
-            
+
             if(position == 1) {
             	y += cityShiftAmount;
             } else if(position == 2) {
@@ -212,10 +211,10 @@ public class TSP {
             } else if(position == 4) {
             	x -= cityShiftAmount;
             }
-            
+
             newPositions[i] = new City(x, y);
         }
-        
+
         return newPositions;
     }
 
@@ -235,7 +234,7 @@ public class TSP {
         } else {
 
             if (args.length > 1) {
-                display = true; 
+                display = true;
             }
 
             try {
@@ -251,14 +250,14 @@ public class TSP {
                     frame.pack();
                     frame.setSize(width + 300, height);
                     frame.setResizable(false);
-                    frame.setLayout(new BorderLayout()); 
-                    
+                    frame.setLayout(new BorderLayout());
+
                     statsText = new TextArea(35, 35);
                     statsText.setEditable(false);
 
                     statsArea.add(statsText);
                     frame.add(statsArea, BorderLayout.EAST);
-                    
+
                     frame.setVisible(true);
                 }
 
@@ -267,73 +266,28 @@ public class TSP {
                 avg = 0;
                 max = 0;
                 sum = 0;
-                
+
                 String filename = new File("").getAbsolutePath() + "/resources/cityList.txt";
                 originalCities = cities = LoadCitiesFromFile(filename, cities);
                 writeLog("Run Stats for experiment at: " + currentTime);
+
+                long startTime = System.nanoTime();
+                System.out.println("Parallell started with runs = " + runs);
+                IntStream.range(0, runs).parallel().forEach(i -> {
+                    Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize);
+
+                    max = (main.getGenMin() > max || max == 0) ? main.getGenMin() : max;
+                    min = (main.getGenMin() < min || min == 0) ? main.getGenMin() : min;
+                    sum +=  main.getGenMin();
+                  });
                 
-                long totalStartTime = System.nanoTime();
-                for (int y = 1; y <= runs; y++) {
-                    genMin = 0;
-                    print(display,  "Run " + y + "\n");
+                avg = sum / runs; 
+                long endTime = System.nanoTime();
 
-                    // create the initial population of chromosomes
-                    chromosomes = new Chromosome[populationSize];
-                    for (int x = 0; x < populationSize; x++) {
-                        chromosomes[x] = new Chromosome(cities);
-                    }
-
-                    generation = 0;
-                    double thisCost = 0.0;
-                    
-                    while (generation < 100) {
-                		   long startTime = System.nanoTime();
-                		   evolve();
-                        if(generation % 5 == 0 ) 
-                            cities = MoveCities(originalCities); //Move from original cities, so they only move by a maximum of one unit.
-                        generation++;
-                        
-                        Chromosome.sortChromosomes(chromosomes, populationSize);
-                        double minCost = chromosomes[0].getCost();
-                        thisCost = minCost;
-
-                        if (thisCost < genMin || genMin == 0) {
-                            genMin = thisCost;
-                        }
-                        
-                        NumberFormat nf = NumberFormat.getInstance();
-                        nf.setMinimumFractionDigits(2);
-                        nf.setMinimumFractionDigits(2);
-                        
-	            			long endTime = System.nanoTime();
-	            			long duration = (endTime - startTime)/1000000;
-	            			
-                        print(display, "Gen: " + generation + " | minCost: " + (int) thisCost + " | Time: " + duration + "ms");
-
-                        if(display) {
-                            updateGUI();
-                        }
-                    }
-
-                    writeLog(genMin + "");
-
-                    if (genMin > max) {
-                        max = genMin;
-                    }
-
-                    if (genMin < min || min == 0) {
-                        min = genMin; 
-                    }
-
-                    sum +=  genMin;
-                    print(display, "");
-                }
-
-                long totalEndTime = System.nanoTime();
-                int totalDuration = (int) ((totalEndTime - totalStartTime)*1E-6); 
+                int totalDuration = (int) ((endTime - startTime)*1E-6);
                 int avgTimePerGeneration = totalDuration / (runs*100);
                 double avgTimePerRun = totalDuration / runs*1E-3;
-                
+
                 avg = sum / runs;
                 print(display, "Statistics after " + runs + " runs");
                 print(display, "Total time: " + totalDuration*1E-3 + "s, Time per run: " + avgTimePerRun + "s, Time per generation: " + avgTimePerGeneration + "ms");
@@ -347,4 +301,5 @@ public class TSP {
             }
         }
     }
+	
 }
