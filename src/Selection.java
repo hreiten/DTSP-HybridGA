@@ -8,6 +8,12 @@ public abstract class Selection {
     		public R apply (A a, B b);
     }
 	
+    /**
+     * Probabilistically selects individuals from the population based on relative fitness
+     * Probability function is P(x) = 1 - x/max
+     * @param population the initial population
+     * @return the selected population
+     */
 	public static Chromosome[] FitnessProportionateSelection(Chromosome[] population){
 		Chromosome[] pop = Arrays.copyOf(population, population.length);
 
@@ -19,8 +25,6 @@ public abstract class Selection {
 			min = (cost < min) ? cost : max;
 		}
 		
-//		Function<Double,Double> probFuncSum = f -> ((double) 1/(population.length-1))*(1-f/sum);
-//		Function<Double,Double> probFuncSum2 = f -> 1 - f/sum;
 		Function2<Double,Double,Double> fitnessFunc = (cost,maxCost) -> ((double) 1 - cost/maxCost);
 		double[] probs = new double[pop.length];
 		for (int i=0; i<pop.length;i++) {
@@ -41,6 +45,13 @@ public abstract class Selection {
 		return newPop; 
 	}
 	
+	/**
+	 * Deterministically select from population using the tournament technique
+	 * @param population the initial population
+	 * @param tournamentSize the size of the tournament (# individuals in tournament)
+	 * @param selectPerTournament how many winners per tournament
+	 * @return selected population
+	 */
 	public static Chromosome[] DeterministicTournamentSelection(Chromosome[] population, int tournamentSize, int selectPerTournament){
 		Chromosome[] newPopulation = new Chromosome[population.length];
 		
@@ -66,6 +77,11 @@ public abstract class Selection {
 		return newPopulation;
 	}
 	
+	/**
+	 * Probabilistically select individuals based on relative rank
+	 * @param population the initial population
+	 * @return the selected population
+	 */
 	public static Chromosome[] RankBasedSelection(Chromosome[] population) {
 		Chromosome[] pop = Arrays.copyOf(population, population.length);
 		Chromosome.sortChromosomes(pop, pop.length);

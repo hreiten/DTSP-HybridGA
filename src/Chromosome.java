@@ -8,7 +8,7 @@ class Chromosome implements Comparable<Chromosome> {
     /**
      * The cost of following the cityList order of this chromosome.
      */
-    protected double cost;
+    protected double cost; 
 
     /**
      * @param cities The order that this chromosome would visit the cities.

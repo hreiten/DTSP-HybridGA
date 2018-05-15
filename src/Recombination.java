@@ -2,21 +2,12 @@ import java.util.Arrays;
 
 public abstract class Recombination {
 	
-	public static Chromosome Breed(Chromosome parent1, Chromosome parent2, City [] cityList, double crossoverRate){
-		int[] childIndexes;
-		
-		double sampledProb = TSP.randomGenerator.nextDouble(); 
-		if (sampledProb > crossoverRate) {
-			childIndexes = parent1.getCityIndexes();
-		} else {
-			//childIndexes = CycleCrossover(parent1.getCityIndexes(), parent2.getCityIndexes());
-			childIndexes = nPointCrossover(1,parent1.getCityIndexes(), parent2.getCityIndexes());
-		}
-		
-		Chromosome child = new Chromosome(childIndexes, cityList);
-		return child; 
-	}
-	
+	/**
+	 * Crossover by Cycle Crossover
+	 * @param p1 first parent vector
+	 * @param p2 second parent vector
+	 * @return a new vector by applying cycle crossover to the two parents
+	 */
 	public static int[] CycleCrossover(int[] p1, int[] p2) {
 		int[] child = Arrays.copyOf(p2, p2.length);
 		
@@ -51,6 +42,7 @@ public abstract class Recombination {
 		int[] newIndexes = new int[p1.length];
 		int[] crossoverPoints = new int[n];
 		
+		// first sample n crossover points
 		for (int i=0; i<n; i++) {
 			int sampledIndex = 0; 
 			while(Utils.find(crossoverPoints, sampledIndex) >= 0 || sampledIndex == 0) {
@@ -68,8 +60,7 @@ public abstract class Recombination {
 		while (added+1 < newIndexes.length) {
 			
 			if (swap) { 
-				arr1 = p2; 
-				arr2 = p1; 
+				arr1 = p2; arr2 = p1; 
 				swap = false; 
 				currIndex = 0;
 			}

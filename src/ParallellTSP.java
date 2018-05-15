@@ -1,10 +1,3 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Panel;
-import java.awt.TextArea;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,8 +11,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import javax.swing.JFrame;
 
 public class ParallellTSP {
 	
@@ -68,11 +59,6 @@ public class ParallellTSP {
     protected static Chromosome[] chromosomes;
 
     /**
-    * Frame to display cities and paths
-    */
-    private static JFrame frame;
-
-    /**
      * Integers used for statistical data
      */
     private static double min;
@@ -80,17 +66,6 @@ public class ParallellTSP {
     private static double max;
     private static double sum;
     private static double genMin;
-
-    /**
-     * Width and Height of City Map, DO NOT CHANGE THESE VALUES!
-     */
-    private static int width = 600;
-    private static int height = 600;
-
-
-    private static Panel statsArea;
-    private static TextArea statsText;
-
 
     /*
      * Writing to an output file with the costs.
@@ -107,67 +82,6 @@ public class ParallellTSP {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-    /*
-     *  Deals with printing same content to System.out and GUI
-     */
-    private static void print(boolean guiEnabled, String content) {
-        if(guiEnabled) {
-            statsText.append(content + "\n");
-        }
-
-        System.out.println(content);
-    }
-
-    public static void evolve() {
-    		chromosomes = Evolution.Evolve(chromosomes,cities);
-    }
-
-    /**
-     * Update the display
-     */
-    public static void updateGUI() {
-        Image img = frame.createImage(width, height);
-        Graphics g = img.getGraphics();
-        FontMetrics fm = g.getFontMetrics();
-
-        g.setColor(Color.black);
-        g.fillRect(0, 0, width, height);
-
-        if (true && (cities != null)) {
-            for (int i = 0; i < cityCount; i++) {
-                int xpos = cities[i].getx();
-                int ypos = cities[i].gety();
-                g.setColor(Color.green);
-                g.fillOval(xpos - 5, ypos - 5, 10, 10);
-
-            }
-
-            g.setColor(Color.gray);
-            for (int i = 0; i < cityCount; i++) {
-                int icity = chromosomes[0].getCity(i);
-                if (i != 0) {
-                    int last = chromosomes[0].getCity(i - 1);
-                    g.drawLine(
-                        cities[icity].getx(),
-                        cities[icity].gety(),
-                        cities[last].getx(),
-                        cities[last].gety());
-                }
-            }
-
-            int homeCity = chromosomes[0].getCity(0);
-            int lastCity = chromosomes[0].getCity(cityCount - 1);
-
-            //Drawing line returning home
-            g.drawLine(
-                    cities[homeCity].getx(),
-                    cities[homeCity].gety(),
-                    cities[lastCity].getx(),
-                    cities[lastCity].gety());
-        }
-        frame.getGraphics().drawImage(img, 0, 0, frame);
     }
 
     protected static City[] LoadCitiesFromFile(String filename, City[] citiesArray) {
@@ -193,8 +107,7 @@ public class ParallellTSP {
     }
 
     protected static City[] MoveCities(City[]cities) {
-    	City[] newPositions = new City[cities.length];
-        //Random randomGenerator = new Random();
+    		City[] newPositions = new City[cities.length];
 
         for(int i = 0; i < cities.length; i++) {
         	int x = cities[i].getx();
@@ -224,43 +137,17 @@ public class ParallellTSP {
         String currentTime  = df.format(today);
 
         int runs;
-        boolean display = false;
-        String formatMessage = "Usage: java TSP 1 [gui] \n java TSP [Runs] [gui]";
+        String formatMessage = "Usage: java TSP [Runs]";
 
         if (args.length < 1) {
             System.out.println("Please enter the arguments");
             System.out.println(formatMessage);
-            display = false;
         } else {
-
-            if (args.length > 1) {
-                display = true;
-            }
 
             try {
                 cityCount = 50;
                 populationSize = 100;
                 runs = Integer.parseInt(args[0]);
-
-                if(display) {
-                    frame = new JFrame("Traveling Salesman");
-                    statsArea = new Panel();
-
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.pack();
-                    frame.setSize(width + 300, height);
-                    frame.setResizable(false);
-                    frame.setLayout(new BorderLayout());
-
-                    statsText = new TextArea(35, 35);
-                    statsText.setEditable(false);
-
-                    statsArea.add(statsText);
-                    frame.add(statsArea, BorderLayout.EAST);
-
-                    frame.setVisible(true);
-                }
-
 
                 min = 0;
                 avg = 0;
@@ -274,7 +161,7 @@ public class ParallellTSP {
                 long startTime = System.nanoTime();
                 System.out.println("Parallell started with runs = " + runs);
                 IntStream.range(0, runs).parallel().forEach(i -> {
-                    Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize);
+                    Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize, false);
 
                     max = (main.getGenMin() > max || max == 0) ? main.getGenMin() : max;
                     min = (main.getGenMin() < min || min == 0) ? main.getGenMin() : min;
@@ -289,11 +176,11 @@ public class ParallellTSP {
                 double avgTimePerRun = totalDuration / runs*1E-3;
 
                 avg = sum / runs;
-                print(display, "Statistics after " + runs + " runs");
-                print(display, "Total time: " + totalDuration*1E-3 + "s, Time per run: " + avgTimePerRun + "s, Time per generation: " + avgTimePerGeneration + "ms");
-                print(display, "Solution found after " + generation + " generations." + "\n");
-                print(display, "Statistics of minimum cost from each run \n");
-                print(display, "Lowest: " + min + "\nAverage: " + avg + "\nHighest: " + max + "\n");
+                System.out.println("Statistics after " + runs + " runs");
+                System.out.println("Total time: " + totalDuration*1E-3 + "s, Time per run: " + avgTimePerRun + "s, Time per generation: " + avgTimePerGeneration + "ms");
+                System.out.println("Solution found after " + generation + " generations." + "\n");
+                System.out.println("Statistics of minimum cost from each run \n");
+                System.out.println("Lowest: " + min + "\nAverage: " + avg + "\nHighest: " + max + "\n");
 
             } catch (NumberFormatException e) {
                 System.out.println("Please ensure you enter integers for cities and population size");

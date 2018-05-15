@@ -15,10 +15,13 @@ public class Main {
 	private double sum;
 	private double genMin;
 	
-	public Main(City[] cities, City[] originalCities, int populationSize) {
+	private boolean DO_PRINT; 
+	
+	public Main(City[] cities, City[] originalCities, int populationSize, boolean DO_PRINT) {
 		this.cities = cities; 
 		this.originalCities = originalCities; 
-		this.populationSize = populationSize; 
+		this.populationSize = populationSize;
+		this.DO_PRINT = DO_PRINT; 
 		
 		this.run(); 
 	}
@@ -51,6 +54,10 @@ public class Main {
 	        	if(generation % 5 == 0 ) {
 	        		cities = TSP.MoveCities(originalCities);
 	        	}
+	        	if (DO_PRINT) {
+	        		System.out.println("Gen: " + generation + " Cost: " + population[0].getCost());
+	        	}
+	        	
 	        	generation++; 
 		}
 		TSP.writeLog(this.genMin + "");

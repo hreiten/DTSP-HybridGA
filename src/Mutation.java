@@ -2,18 +2,13 @@ import java.util.Arrays;
 
 public abstract class Mutation {
 
-	public static Chromosome mutate(Chromosome original, City[] cityList, double mutationProb) {
-		
-		double sampledProb = TSP.randomGenerator.nextDouble();
-		if (sampledProb > mutationProb) {
-			return original;
-		} else {
-			int[] newCityIndexes = mutateInversion(original.getCityIndexes()); 
-			return new Chromosome(newCityIndexes,cityList);
-		}
-		
-	}
-	
+	/**
+	 * Mutation by probabilistically swapping two indexes in a vector with each other
+	 * Goes through each entry in vector and decides if it should swap or not
+	 * @param indexes vector of integers to be mutated
+	 * @param singleProb probability that a swap will happen
+	 * @return mutated vector
+	 */
 	public static int[] mutateSwap(int[] indexes, double singleProb){
 		int[] newCityIndexes = Arrays.copyOf(indexes, indexes.length);
 		
@@ -31,6 +26,12 @@ public abstract class Mutation {
 		return newCityIndexes;
 	}
 	
+	/**
+	 * Mutation by sampling two indexes and reversing the order of the 
+	 * elements in between them.
+	 * @param cityIndexes the vector of numbers to mutate
+	 * @return mutated vector
+	 */
 	public static int[] mutateInversion(int[] cityIndexes) {
 		int[] indexes = Arrays.copyOf(cityIndexes, cityIndexes.length);
 		

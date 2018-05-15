@@ -6,6 +6,13 @@ public abstract class Survival {
     return chromosomes;
   }
 
+  /**
+   * Replacement by elitism. Keeps n fittest individuals from original population.
+   * @param originalPopulation the original population (parents)
+   * @param children the population of offspring
+   * @param individualsToKeep the number of fittest individuals to keep
+   * @return
+   */
   public static Chromosome[] ElitistSurvival(Chromosome[] originalPopulation, Chromosome[] children, int individualsToKeep) {
 	  Chromosome[] population = Arrays.copyOf(originalPopulation, originalPopulation.length);
 	  Chromosome.sortChromosomes(population, population.length);
