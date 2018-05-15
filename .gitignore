@@ -63,3 +63,5 @@ Thumbs.db
 
 # Specific #
 messages.json
+*.txt
+*.out
