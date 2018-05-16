@@ -54,7 +54,10 @@ public class Main {
 	        	Arrays.sort(population);
 	        	
 	        	TSP.chromosomes = population;
-	        	genMin = (population[0].getCost() < genMin || genMin == 0) ? population[0].getCost() : genMin; 
+	        	if (population[0].getCost() < genMin || genMin == 0) {
+	        		genMin = population[0].getCost();
+	        		if (TSP.DISPLAY) { TSP.updateGUI();}
+	        	}
 	        	
 	        	if(generation % 5 == 0 ) {
 	        		cities = TSP.MoveCities(originalCities);
@@ -62,9 +65,9 @@ public class Main {
 	        	if (DO_PRINT) {
 	        		TSP.print(TSP.DISPLAY, "Gen: " + generation + " Cost: " + population[0].getCost());
 	        	}
-	        	if (TSP.DISPLAY) {
-	        		TSP.updateGUI();
-	        	}
+//	        	if (TSP.DISPLAY) {
+//	        		TSP.updateGUI();
+//	        	}
 	        	
 	        	generation++; 
 		}

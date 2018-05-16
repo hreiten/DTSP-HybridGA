@@ -15,10 +15,12 @@ public class TSP {
 
 	private static final int cityShiftAmount = 60; //DO NOT CHANGE THIS.
 
-	public static Random randomGenerator = new Random();
+	private static int SEED = 25;
+	public static Random randomGenerator = new Random(SEED);
 
 	private static boolean RUN_PARALLEL;
 	protected static boolean DISPLAY; 
+	private static boolean DO_PRINT = false; 
 
     /**
      * How many cities to use.
@@ -299,7 +301,6 @@ public class TSP {
 				} 
 				
 				else {
-					boolean DO_PRINT = true;
 					for (int run = 1; run <= runs; run++) {
 						
 						if (DO_PRINT) print(DISPLAY, "Run " + run);
