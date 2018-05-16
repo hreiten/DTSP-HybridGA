@@ -15,29 +15,28 @@ public abstract class Selection {
      * @return the selected population
      */
 	public static Chromosome[] FitnessProportionateSelection(Chromosome[] population){
-		Chromosome[] pop = Arrays.copyOf(population, population.length);
-
-		double sum = 0; double max = 0.0; double min = 100000.0;
-		for (int i=0; i<pop.length; i++) {
-			double cost = pop[i].getCost();
-			sum += cost;
-			max = (cost > max) ? cost : max;
-			min = (cost < min) ? cost : max;
+		
+		double max = 0.0; double sum = 0.0; 
+		for (int i=0; i<population.length; i++) {
+			double cost = population[i].getCost();
+			sum += cost; 
+			max = (cost > max || max == 0.0) ? cost : max;
 		}
 		
-		Function2<Double,Double,Double> fitnessFunc = (cost,maxCost) -> ((double) 1 - cost/maxCost);
-		double[] probs = new double[pop.length];
-		for (int i=0; i<pop.length;i++) {
-			probs[i] = fitnessFunc.apply(pop[i].getCost(), max);
+		Function2<Double,Double,Double> probSum = (cost,sumCost) -> ((double) cost/sumCost);
+		Function2<Double,Double,Double> probMax = (cost,maxCost) -> ((double) 1 - cost/maxCost);
+		double[] probs = new double[population.length];
+		for (int i=0; i<population.length;i++) {
+			probs[i] = probMax.apply(population[i].getCost(), max);
 		}
 		
-		Chromosome[] newPop = new Chromosome[pop.length];
+		Chromosome[] newPop = new Chromosome[population.length];
 		int added = 0; 
 		while (added < newPop.length) {
-			int index = TSP.randomGenerator.nextInt(pop.length);
+			int index = TSP.randomGenerator.nextInt(population.length);
 			double sampledProb = TSP.randomGenerator.nextDouble();
 			if (sampledProb <= probs[index]) {
-				newPop[added] = pop[added];
+				newPop[added] = population[index];
 				added++;
 			}
 		}
@@ -58,18 +57,24 @@ public abstract class Selection {
 		int addedElements = 0;
 		Chromosome[] contestors; 
 		while (addedElements < population.length) {
+			// sample n contestors to compete in the tournament
 			contestors = new Chromosome[tournamentSize];
 			for (int j=0; j<contestors.length;j++) {
 				contestors[j] = population[TSP.randomGenerator.nextInt(population.length)];
 			}
-			Chromosome.sortChromosomes(contestors, contestors.length);
+			Arrays.sort(contestors);
 			
+			// find out how many from the tournament to select
 			int addElements = selectPerTournament; 
 			if (addedElements + addElements > population.length) { addElements = population.length - addedElements; }
 			
+			// add the winners to the new population
+			//System.out.println("contestors are " + Arrays.toString(contestors));
 			int k=0;
 			for (int i=addedElements; i<addedElements + addElements; i++) {
-				newPopulation[i] = contestors[k++];
+				newPopulation[i] = contestors[k];
+				//System.out.println("Added " + contestors[k]);
+				k++;
 			}
 			
 			addedElements += addElements; 
@@ -84,7 +89,7 @@ public abstract class Selection {
 	 */
 	public static Chromosome[] RankBasedSelection(Chromosome[] population) {
 		Chromosome[] pop = Arrays.copyOf(population, population.length);
-		Chromosome.sortChromosomes(pop, pop.length);
+		Arrays.sort(pop);
 		
 		double nneg = 0.5;
 		double npos = 2 - nneg; 

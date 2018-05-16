@@ -56,11 +56,11 @@ public abstract class Recombination {
 		int added = 0; int currIndex = 0;
 		int[] arr1 = p1; int[] arr2 = p2; 
 		
-		int counter = 0;
-		while (added+1 < newIndexes.length) {
+		while (added < newIndexes.length-1) {
 			
 			if (swap) { 
-				arr1 = p2; arr2 = p1; 
+				arr1 = p2; 
+				arr2 = p1; 
 				swap = false; 
 				currIndex = 0;
 			}

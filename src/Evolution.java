@@ -2,10 +2,11 @@ import java.util.Arrays;
 
 class Evolution{
 
+	static int simCount; 
 	// Simulated Annealing
-    static int nRuns = 1800; 			// max number of runs for the SA search
-    static double startTemp = 1;			// initial temperature
-    static double alpha = 0.9985;		// alpha parameter (cooling rate)
+    static int nRuns = 7000; 			// max number of runs for the SA search
+    static double startTemp = 1.0;		// initial temperature
+    static double alpha = 0.996;			// alpha parameter (cooling rate)
 
     // Selection
     static int tournamentSize = 3;		// size of tournament
@@ -13,17 +14,13 @@ class Evolution{
     
     // Crossover
     static int crossoverPoints = 1; 		// number of crossoverpoints (N as in N-point-Crossover)
-    static double crossoverRate = 0.75;	// probability that a crossover will take place
+    static double crossoverRate = 0.8;	// probability that a crossover will take place
 
     // Mutation
     static double mutationProb = 0.2; 	// probability that a mutation will take place
-    
-    // Survival
-    static int elitistKeep = 1; 
 
     /**
      * Function to breed a child from two parent solutions using crossover
-     * Using 1-Point crossover in this function.
      * @param parent1 the first parent solution
      * @param parent2 the second parent solution
      * @param cityList list of all city objects
@@ -45,8 +42,7 @@ class Evolution{
 	}
 
 	/**
-	 * Function to mutate a solution.
-	 * Using inversion mutation in this function.
+	 * Mutates a Chromosome.
 	 * @param original the chromosome to mutate
 	 * @param cityList list of the City objects
 	 * @param mutationProb the probability that the mutation will take place
@@ -63,8 +59,8 @@ class Evolution{
 	}
 
 	/**
-	 * Determines whether all individuals in a population are valid
-	 * Checks whether there are enough unique cities in every chromosome.
+	 * Determines whether all individuals in a population are valid by 
+	 * checking the number of unique indexes in the individual's city indexes.
 	 * @param chromosomes the population to check
 	 * @return true if there are 50 unique cities in every individual
 	 */
@@ -85,11 +81,13 @@ class Evolution{
 		Chromosome[] newPopulation = new Chromosome[population.length];
 
 		// ** Selection **
+		//Chromosome[] parents = Selection.FitnessProportionateSelection(population);
 	    Chromosome[] parents = Selection.DeterministicTournamentSelection(population, tournamentSize, choosePerTournament);
 
 	    // ** Recombination **
 	    Chromosome[] children = new Chromosome[population.length];
 	    Chromosome parent1, parent2, child;
+	    
 
 	    for (int i=0;i<population.length;i++) {
 	    		parent1 = parents[i];
@@ -101,20 +99,26 @@ class Evolution{
 	    		// ** Mutation **
 	    		child = mutate(child, cityList, mutationProb);
 	    		
-	    		// ** Local search using Simulated Annealing **
-	    		if (child.getCost() < parent1.getCost() && child.getCost() < parent2.getCost()) {
-	    			child = SimulatedAnnealing.simulatedAnnealing(nRuns, startTemp, alpha, child, cityList);
-	    		}
-	    		
 	    		children[i] = child;
 	    }
 	    
-	    // ** Survival / Selection **
-	    newPopulation = Survival.ElitistSurvival(parents, children, elitistKeep);
-
+	    // ** Local search using Simulated Annealing **
+	    // Do this only if best child == best parent
+	    Arrays.sort(parents);
+	    Arrays.sort(children);
+	    
+	    if (children[0].getCost() < parents[0].getCost()) {
+	    		simCount++;
+	    		children[0] = SimulatedAnnealing.simulatedAnnealing(nRuns, startTemp, alpha, children[0], cityList);
+	    }
+	    
+	    // ** Survival / Replacement **
+	    newPopulation = Survival.GenerationalBasedSurvival(children);
+	    
 //	    if(!validatePopulation(newPopulation)) {
-//	    		throw new IllegalStateException("# unique elements in new population is != " + newPopulation[0].getCityIndexes().length);
+//	    		throw new IllegalStateException("Number of unique elements in new population is != " + newPopulation[0].getCityIndexes().length);
 //	    }
+	    
 	    return newPopulation;
 	}
 

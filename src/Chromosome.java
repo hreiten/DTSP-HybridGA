@@ -1,4 +1,4 @@
-class Chromosome implements Comparable<Chromosome> {
+class Chromosome implements Comparable<Chromosome>{
 
     /**
      * The list of cities, which are the genes of this chromosome.
@@ -11,13 +11,19 @@ class Chromosome implements Comparable<Chromosome> {
     protected double cost; 
 
     /**
-     * @param cities The order that this chromosome would visit the cities.
+     * Constructor. 
+     * @param cityIndexes the order of which city of index i will be visited
+     * @param cities the list of City objects
      */
     Chromosome(int[] cityIndexes, City[] cities) {
     		this.cityIndexes = cityIndexes; 
         calculateCost(cities);
     }
     
+    /**
+     * Constructor. Will initialize by randomly setting cityIndexes.
+     * @param cities list of city objects
+     */
     Chromosome(City[] cities) {
     		int[] cityIndexes = new int[cities.length];
 		for (int i=0; i<cities.length; i++) {
@@ -29,6 +35,9 @@ class Chromosome implements Comparable<Chromosome> {
 		calculateCost(cities);
     }
     
+    /**
+     * Shuffles this chromosomes cityIndexes to a random order.
+     */
     void shuffleCityIndexes() {
         for (int y = 0; y < this.cityIndexes.length; y++) {
             int temp = this.cityIndexes[y];
@@ -40,8 +49,7 @@ class Chromosome implements Comparable<Chromosome> {
 
     /**
      * Calculate the cost of the specified list of cities.
-     *
-     * @param cities A list of cities.
+     * @param cities list of City objects.
      */
     void calculateCost(City[] cities) {
         cost = 0;
@@ -75,7 +83,6 @@ class Chromosome implements Comparable<Chromosome> {
 
     /**
      * Set the order of cities that this chromosome would visit.
-     *
      * @param list A list of cities.
      */
     void setCities(int[] list) {
@@ -86,43 +93,20 @@ class Chromosome implements Comparable<Chromosome> {
 
     /**
      * Set the index'th city in the city list.
-     *
      * @param index The city index to change
      * @param value The city number to place into the index.
      */
     void setCity(int index, int value) {
         cityIndexes[index] = value;
     }
-
-    /**
-     * Sort the chromosomes by their cost.
-     *
-     * @param chromosomes An array of chromosomes to sort.
-     * @param num         How much of the chromosome list to sort.
-     */
-    public static void sortChromosomes(Chromosome chromosomes[], int num) {
-        Chromosome ctemp;
-        boolean swapped = true;
-        while (swapped) {
-            swapped = false;
-            for (int i = 0; i < num - 1; i++) {
-                if (chromosomes[i].getCost() > chromosomes[i + 1].getCost()) {
-                    ctemp = chromosomes[i];
-                    chromosomes[i] = chromosomes[i + 1];
-                    chromosomes[i + 1] = ctemp;
-                    swapped = true;
-                }
-            }
-        }
-    }
-
-	@Override
-	public int compareTo(Chromosome other) {
-		return (int) (this.getCost() - other.getCost());
-	}
 	
 	@Override
 	public String toString() {
 		return "" + this.getCost();
+	}
+
+	@Override
+	public int compareTo(Chromosome o) {
+		return Double.valueOf(this.getCost()).compareTo(Double.valueOf(o.getCost()));
 	}
 }

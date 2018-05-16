@@ -26,7 +26,7 @@ public abstract class SimulatedAnnealing {
 	public static Chromosome simulatedAnnealing(int nRuns, double startTemp, double alpha, Chromosome original, City[] cityList) {
 		double annealTemp = startTemp; 
 		double acceptProb;
-		
+
 		Chromosome bestCandidate = new Chromosome(original.getCityIndexes(), cityList);
 		Chromosome candidate = new Chromosome(original.getCityIndexes(), cityList);
 		
