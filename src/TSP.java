@@ -20,7 +20,7 @@ public class TSP {
 
 	private static boolean RUN_PARALLEL;
 	protected static boolean DISPLAY; 
-	private static boolean DO_PRINT = false; 
+	private static boolean DO_PRINT = true; 
 
     /**
      * How many cities to use.
@@ -112,10 +112,6 @@ public class TSP {
         }
 
         System.out.println(content);
-    }
-
-    public static void evolve() {
-    		chromosomes = Evolution.Evolve(chromosomes,cities);
     }
 
     /**
@@ -275,7 +271,7 @@ public class TSP {
 
                     frame.setVisible(true);
                 }
-
+                
                 min = 0;
                 avg = 0;
                 max = 0;
