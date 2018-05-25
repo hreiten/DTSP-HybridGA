@@ -12,15 +12,14 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 public class TSP {
+    private static final int cityShiftAmount = 60;     //DO NOT CHANGE THIS.
 
-	private static final int cityShiftAmount = 60; //DO NOT CHANGE THIS.
+    private static int SEED = 25;     // to ensure reproducibility
+    public static Random randomGenerator = new Random(SEED);     // used in all classes
 
-	private static int SEED = 25;
-	public static Random randomGenerator = new Random(SEED);
-
-	private static boolean RUN_PARALLEL;
-	protected static boolean DISPLAY; 
-	private static boolean DO_PRINT = true; 
+    private static boolean RUN_PARALLEL;     // if the main loop should be run in parallel
+    protected static boolean DISPLAY;     // if GUI should be enabled
+    public static boolean DO_PRINT = true;     // if progress through generations and runs should be printed
 
     /**
      * How many cities to use.
@@ -30,7 +29,12 @@ public class TSP {
     /**
      * How many chromosomes to use.
      */
-    protected static int populationSize = 100; 
+    protected static int populationSize = 100;
+
+    /**
+     * How many chromosomes to use.
+     */
+    protected static int generations = 100;
 
     /**
      * The part of the population eligable for mating.
@@ -63,8 +67,8 @@ public class TSP {
     protected static Chromosome[] chromosomes;
 
     /**
-    * Frame to display cities and paths
-    */
+     * Frame to display cities and paths
+     */
     private static JFrame frame;
 
     /**
@@ -107,7 +111,7 @@ public class TSP {
      *  Deals with printing same content to System.out and GUI
      */
     public static void print(boolean guiEnabled, String content) {
-        if(guiEnabled) {
+        if (guiEnabled) {
             statsText.append(content + "\n");
         }
 
@@ -134,8 +138,10 @@ public class TSP {
             }
 
             g.setColor(Color.gray);
+
             for (int i = 0; i < cityCount; i++) {
                 int icity = chromosomes[0].getCity(i);
+
                 if (i != 0) {
                     int last = chromosomes[0].getCity(i - 1);
                     g.drawLine(
@@ -151,11 +157,12 @@ public class TSP {
 
             //Drawing line returning home
             g.drawLine(
-                    cities[homeCity].getx(),
-                    cities[homeCity].gety(),
-                    cities[lastCity].getx(),
-                    cities[lastCity].gety());
+                cities[homeCity].getx(),
+                cities[homeCity].gety(),
+                cities[lastCity].getx(),
+                cities[lastCity].gety());
         }
+
         frame.getGraphics().drawImage(img, 0, 0, frame);
     }
 
@@ -165,26 +172,27 @@ public class TSP {
      * @param citiesArray array where the City objects should be stored
      * @return City-array
      */
-    
+
     protected static City[] LoadCitiesFromFile(String path, City[] cityArray) {
-    		ArrayList<City> cities = new ArrayList<City>();
-    		
-    		try {
-    			Scanner scanner = new Scanner(new File(path));
-    			while (scanner.hasNext()){
-        			String next = scanner.nextLine(); 
-        			String[] coordinates = next.split(", ");
-        			cities.add(new City(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[1])));
-        		}
-        		scanner.close();
-    		} catch (FileNotFoundException fne){
-    			System.err.println("Error in LoadCitiesFromFile\n" + fne.getMessage());
-    		} catch (Exception e) {
-    			System.err.println("Error in LoadCitiesFromFile\nError reading file line by line:" + e.getMessage());
-    		}
-    		
-    		cityArray = new City[cities.size()];
-    		return cities.toArray(cityArray);
+        ArrayList<City> cities = new ArrayList<City>();
+
+        try {
+            Scanner scanner = new Scanner(new File(path));
+
+            while (scanner.hasNext()) {
+                String next = scanner.nextLine();
+                String[] coordinates = next.split(", ");
+                cities.add(new City(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[1])));
+            }
+            scanner.close();
+        } catch (FileNotFoundException fne) {
+            System.err.println("Error in LoadCitiesFromFile\n" + fne.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error in LoadCitiesFromFile\nError reading file line by line:" + e.getMessage());
+        }
+
+        cityArray = new City[cities.size()];
+        return cities.toArray(cityArray);
     }
 
     /**
@@ -193,23 +201,23 @@ public class TSP {
      * @return new city array with cities moved.
      */
     protected static City[] MoveCities(City[] cities) {
-    	City[] newPositions = new City[cities.length];
+        City[] newPositions = new City[cities.length];
         //Random randomGenerator = new Random();
 
-        for(int i = 0; i < cities.length; i++) {
-        	int x = cities[i].getx();
-        	int y = cities[i].gety();
+        for (int i = 0; i < cities.length; i++) {
+            int x = cities[i].getx();
+            int y = cities[i].gety();
 
             int position = randomGenerator.nextInt(5);
 
-            if(position == 1) {
-            	y += cityShiftAmount;
-            } else if(position == 2) {
-            	x += cityShiftAmount;
-            } else if(position == 3) {
-            	y -= cityShiftAmount;
-            } else if(position == 4) {
-            	x -= cityShiftAmount;
+            if (position == 1) {
+                y += cityShiftAmount;
+            } else if (position == 2) {
+                x += cityShiftAmount;
+            } else if (position == 3) {
+                y -= cityShiftAmount;
+            } else if (position == 4) {
+                x -= cityShiftAmount;
             }
 
             newPositions[i] = new City(x, y);
@@ -221,13 +229,14 @@ public class TSP {
     public static void main(String[] args) {
         DateFormat df = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         Date today = Calendar.getInstance().getTime();
-        String currentTime  = df.format(today);
+        String currentTime = df.format(today);
 
         int runs;
+
         DISPLAY = false;
         RUN_PARALLEL = false;
-        String formatMessage = "Usage: java TSP 1 --gui --parallel \n java TSP [Runs] [Flags]\n" + 
-        		"\"--gui\" enables gui \n\"--parallel\" runs the program in parallel (4 cores)";
+        String formatMessage = "Usage: java TSP 1 --gui --parallel \n java TSP [Runs] [Flags]\n" +
+            "\"--gui\" enables gui \n\"--parallel\" runs the program in parallel (4 cores)";
 
         if (args.length < 1) {
             System.out.println("Please enter the arguments");
@@ -235,17 +244,21 @@ public class TSP {
             DISPLAY = false;
         } else {
             if (args.length > 1) {
-	        		if (Utils.find(args, "--gui") >= 0 || args[1].equals("y")) {
-	        			DISPLAY = true;
-	        		}
-            		if (Utils.find(args, "--parallel") >= 0) {
-            			RUN_PARALLEL = true;
-            			DISPLAY = false;
-            		}
-            		if (Utils.find(args,  "y") >= 0) {
-            			RUN_PARALLEL = false;
-            			DISPLAY = true; 
-            		}
+                if (Utils.find(args, "--gui") >= 0 || Utils.find(args,  "y") >= 0) {
+                    RUN_PARALLEL = false;
+                    DISPLAY = true;
+                    DO_PRINT = true;
+                }
+
+                if (Utils.find(args, "--parallel") >= 0) {
+                    RUN_PARALLEL = true;
+                    DISPLAY = false;
+                    DO_PRINT = false;
+                }
+
+                if (Utils.find(args, "--noprint") >= 0) {
+                    DO_PRINT = false;
+                }
             }
 
             try {
@@ -253,7 +266,7 @@ public class TSP {
                 populationSize = 100;
                 runs = Integer.parseInt(args[0]);
 
-                if(DISPLAY) {
+                if (DISPLAY) {
                     frame = new JFrame("Traveling Salesman");
                     statsArea = new Panel();
 
@@ -271,48 +284,48 @@ public class TSP {
 
                     frame.setVisible(true);
                 }
-                
+
                 min = 0;
                 avg = 0;
                 max = 0;
                 sum = 0;
 
                 double startTime, endTime, duration;
-                
-                String filename = new File("").getAbsolutePath() +"/cityList.txt";
+
+                String filename = new File("").getAbsolutePath() + "/cityList.txt";
                 originalCities = cities = LoadCitiesFromFile(filename, cities);
                 writeLog("Run Stats for experiment at: " + currentTime);
 
                 startTime = System.currentTimeMillis();
 
-				if (RUN_PARALLEL) {
-					System.out.println("Parallel started. Runs = " + runs + ".");
-					IntStream.range(0, runs).parallel().forEach(i -> {
-						Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize, false);
+                if (RUN_PARALLEL) {
+                    System.out.println("Parallel started. Runs = " + runs + ".");
+                    IntStream.range(0, runs).parallel().forEach(i->{
+                        Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize, generations);
+                        main.run();
 
-						max = (main.getGenMin() > max || max == 0) ? main.getGenMin() : max;
-						min = (main.getGenMin() < min || min == 0) ? main.getGenMin() : min;
-						sum +=  main.getGenMin();
-					});
-				} 
-				
-				else {
-					for (int run = 1; run <= runs; run++) {
-						
-						if (DO_PRINT) print(DISPLAY, "Run " + run);
-						
-						Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize, DO_PRINT);
-						max = (main.getGenMin() > max || max == 0) ? main.getGenMin() : max;
-						min = (main.getGenMin() < min || min == 0) ? main.getGenMin() : min;
-						sum +=  main.getGenMin();
-						
-	                    if (DO_PRINT) print(DISPLAY, "");
-					}
-				}
+                        max = (main.getGenMin() > max || max == 0) ? main.getGenMin() : max;
+                        min = (main.getGenMin() < min || min == 0) ? main.getGenMin() : min;
+                        sum +=  main.getGenMin();
+                    });
+                } else {
+                    for (int run = 1; run <= runs; run++) {
+                        if (DO_PRINT) print(DISPLAY, "Run " + run);
+
+                        Main main = new Main(Arrays.copyOf(cities, cities.length), originalCities, populationSize, generations);
+                        main.run();
+
+                        max = (main.getGenMin() > max || max == 0) ? main.getGenMin() : max;
+                        min = (main.getGenMin() < min || min == 0) ? main.getGenMin() : min;
+                        sum +=  main.getGenMin();
+
+                        if (DO_PRINT) print(DISPLAY, "");
+                    }
+                }
 
                 endTime = System.currentTimeMillis();
-                duration = (endTime - startTime)*1E-3;
-                double avgTimePerRun = (RUN_PARALLEL) ? (double) duration*4 / runs : (double) duration / runs;
+                duration = (endTime - startTime) * 1E-3;
+                double avgTimePerRun = (RUN_PARALLEL) ? (double)duration * 4 / runs : (double)duration / runs;
 
                 avg = sum / runs;
                 print(DISPLAY, "Statistics after " + runs + " runs");
@@ -320,7 +333,6 @@ public class TSP {
                 print(DISPLAY, "Solution found after " + generation + " generations." + "\n");
                 print(DISPLAY, "Statistics of minimum cost from each run \n");
                 print(DISPLAY, "Lowest: " + min + "\nAverage: " + avg + "\nHighest: " + max + "\n");
-
             } catch (NumberFormatException e) {
                 System.out.println("Please ensure you enter integers for cities and population size");
                 System.out.println(formatMessage);

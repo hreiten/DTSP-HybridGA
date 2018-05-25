@@ -1,5 +1,4 @@
 public class City {
-
     /**
      * The city's x position.
      */
@@ -60,6 +59,7 @@ public class City {
     public int proximity(int x, int y) {
         int xdiff = xpos - x;
         int ydiff = ypos - y;
-        return (int) Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+
+        return (int)Math.sqrt(xdiff * xdiff + ydiff * ydiff);
     }
 }

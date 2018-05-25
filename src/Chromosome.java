@@ -1,5 +1,4 @@
-class Chromosome implements Comparable<Chromosome>{
-
+class Chromosome implements Comparable<Chromosome> {
     /**
      * The list of cities, which are the genes of this chromosome.
      */
@@ -8,33 +7,35 @@ class Chromosome implements Comparable<Chromosome>{
     /**
      * The cost of following the cityList order of this chromosome.
      */
-    protected double cost; 
+    protected double cost;
 
     /**
-     * Constructor. 
+     * Constructor.
      * @param cityIndexes the order of which city of index i will be visited
      * @param cities the list of City objects
      */
     Chromosome(int[] cityIndexes, City[] cities) {
-    		this.cityIndexes = cityIndexes; 
+        this.cityIndexes = cityIndexes;
         calculateCost(cities);
     }
-    
+
     /**
      * Constructor. Will initialize by randomly setting cityIndexes.
      * @param cities list of city objects
      */
     Chromosome(City[] cities) {
-    		int[] cityIndexes = new int[cities.length];
-		for (int i=0; i<cities.length; i++) {
-			cityIndexes[i] = i;
-		}
-		this.cityIndexes = cityIndexes; 
-		this.shuffleCityIndexes();
+        int[] cityIndexes = new int[cities.length];
 
-		calculateCost(cities);
+        for (int i = 0; i < cities.length; i++) {
+            cityIndexes[i] = i;
+        }
+
+        this.cityIndexes = cityIndexes;
+        this.shuffleCityIndexes();
+
+        calculateCost(cities);
     }
-    
+
     /**
      * Shuffles this chromosomes cityIndexes to a random order.
      */
@@ -53,6 +54,7 @@ class Chromosome implements Comparable<Chromosome>{
      */
     void calculateCost(City[] cities) {
         cost = 0;
+
         for (int i = 0; i < cityIndexes.length - 1; i++) {
             double dist = cities[cityIndexes[i]].proximity(cities[cityIndexes[i + 1]]);
             cost += dist;
@@ -68,9 +70,9 @@ class Chromosome implements Comparable<Chromosome>{
     double getCost() {
         return cost;
     }
-    
+
     int[] getCityIndexes() {
-    		return this.cityIndexes;
+        return this.cityIndexes;
     }
 
     /**
@@ -99,14 +101,14 @@ class Chromosome implements Comparable<Chromosome>{
     void setCity(int index, int value) {
         cityIndexes[index] = value;
     }
-	
-	@Override
-	public String toString() {
-		return "" + this.getCost();
-	}
 
-	@Override
-	public int compareTo(Chromosome o) {
-		return Double.valueOf(this.getCost()).compareTo(Double.valueOf(o.getCost()));
-	}
+    @Override
+    public String toString() {
+        return "" + this.getCost();
+    }
+
+    @Override
+    public int compareTo(Chromosome o) {
+        return Double.valueOf(this.getCost()).compareTo(Double.valueOf(o.getCost()));
+    }
 }
